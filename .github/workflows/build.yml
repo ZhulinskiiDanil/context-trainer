@@ -1,0 +1,71 @@
+name: Build Geode Mod
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to build (empty: just build)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
+
+jobs:
+  build:
+    name: Windows build and tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG || github.ref }}
+      - name: Configure model tests
+        run: cmake -S . -B build-tests -DCONTEXT_TESTS_ONLY=ON
+      - name: Build model tests
+        run: cmake --build build-tests --config Release --parallel
+      - name: Run model tests
+        run: ctest --test-dir build-tests -C Release --output-on-failure
+      - name: Build the mod
+        id: build
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          target: Win64
+          sdk: given
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Build Output
+          path: ${{ steps.build.outputs.build-output }}/*.geode
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.tag != '') }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: Build Output
+          path: build-output
+      - name: Publish package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" build-output/*.geode --clobber
+          else
+            awk -v ver="$RELEASE_TAG" '/^# /{p = ($2 == ver); next} p' changelog.md > notes.md
+            gh release create "$RELEASE_TAG" build-output/*.geode \
+              --verify-tag --title "Context Trainer $RELEASE_TAG" --notes-file notes.md
+          fi
