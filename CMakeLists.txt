@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 3.25)
+project(ContextTrainer VERSION 0.7.1 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(CONTEXT_TESTS_ONLY "Build the training model tests without Geode" OFF)
+if (CONTEXT_TESTS_ONLY)
+    enable_testing()
+    add_executable(ContextTrainingTests src/Training.cpp tests/TrainingTests.cpp)
+    target_include_directories(ContextTrainingTests PRIVATE src)
+    add_test(NAME ContextTrainingTests COMMAND ContextTrainingTests)
+    add_executable(ContextAnalysisTests src/Training.cpp src/Analysis.cpp tests/AnalysisTests.cpp)
+    target_include_directories(ContextAnalysisTests PRIVATE src)
+    add_test(NAME ContextAnalysisTests COMMAND ContextAnalysisTests)
+    add_executable(ContextPacingTests src/Pacing.cpp tests/PacingTests.cpp)
+    target_include_directories(ContextPacingTests PRIVATE src)
+    add_test(NAME ContextPacingTests COMMAND ContextPacingTests)
+    add_executable(ContextIntegrityTests src/Integrity.cpp src/Training.cpp tests/IntegrityTests.cpp)
+    target_include_directories(ContextIntegrityTests PRIVATE src)
+    add_test(NAME ContextIntegrityTests COMMAND ContextIntegrityTests)
+    return()
+endif()
+
+if (APPLE)
+    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR IOS)
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    else()
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+    endif()
+endif()
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+if (NOT GEODE_SDK AND DEFINED ENV{GEODE_SDK})
+    set(GEODE_SDK "$ENV{GEODE_SDK}")
+endif()
+if (NOT EXISTS "${GEODE_SDK}/CMakeLists.txt")
+    message(FATAL_ERROR "Set GEODE_SDK to your Geode SDK directory (environment variable or -DGEODE_SDK=...).")
+endif()
+
+add_subdirectory("${GEODE_SDK}" "${CMAKE_CURRENT_BINARY_DIR}/geode")
+
+setup_geode_mod(${PROJECT_NAME} DONT_INSTALL)
+

@@ -1,0 +1,1 @@
+Context Trainer reuses the popup background and run-state panels from Blitzkrieg by Zhulynskyi Danylo, with the author's permission. These files are covered by the included MIT license.

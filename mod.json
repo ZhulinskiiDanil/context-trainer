@@ -1,0 +1,104 @@
+{
+  "geode": "5.10.1",
+  "gd": {
+    "win": "2.2081"
+  },
+  "id": "zhulis.context-trainer",
+  "name": "Context Trainer",
+  "version": "v0.7.1",
+  "developer": "Zhulis",
+  "description": "Choose your starts, learn each run once, and train with a clear next step.",
+  "tags": [
+    "gameplay",
+    "interface",
+    "offline"
+  ],
+  "settings": {
+    "pace": {
+      "type": "title",
+      "name": "Training pace"
+    },
+    "run-minutes": {
+      "type": "int",
+      "name": "Minutes per run (unless 5 passes)",
+      "default": 1,
+      "min": 1,
+      "max": 10,
+      "description": "Keep the same target and StartPos until this much active play or 5 consecutive target passes. Starts change only between attempts. Passing the target never restarts play; later runs are recorded too. Applies after the first pass; Next run can switch earlier."
+    },
+    "break-reminder-minutes": {
+      "type": "int",
+      "name": "Break reminder interval",
+      "default": 20,
+      "min": 0,
+      "max": 120,
+      "description": "A notification after this many active minutes, at the end of an attempt. Never pauses the game. No reminders during the first pass. Set 0 to disable; the plan's Break reminders option must be on."
+    },
+    "consistency": {
+      "type": "title",
+      "name": "Consistency"
+    },
+    "recent-attempts": {
+      "type": "int",
+      "name": "Recent attempts",
+      "default": 6,
+      "min": 1,
+      "max": 100,
+      "description": "A full sample of this many attempts is needed to mark a context repeatable."
+    },
+    "required-successes": {
+      "type": "int",
+      "name": "Required successes",
+      "default": 4,
+      "min": 1,
+      "max": 100,
+      "description": "Successes needed within the recent sample. Capped at Recent attempts. These are adjustable training heuristics."
+    },
+    "blocks": {
+      "type": "title",
+      "name": "Manual session blocks"
+    },
+    "block-attempts": {
+      "type": "int",
+      "name": "Attempts per block",
+      "default": 8,
+      "min": 1,
+      "max": 100,
+      "description": "Used only by Tools > Session manual blocks. Automatic training has no attempt limit."
+    },
+    "cps-budget": {
+      "type": "int",
+      "name": "CPS block limit",
+      "default": 5,
+      "min": 1,
+      "max": 100,
+      "description": "Used only by manual blocks for runs tagged CPS. Does not interrupt automatic training."
+    },
+    "interface": {
+      "type": "title",
+      "name": "Interface"
+    },
+    "show-hud": {
+      "type": "bool",
+      "name": "Show gameplay status",
+      "default": true
+    },
+    "success-notification": {
+      "type": "bool",
+      "name": "Notify when a window is passed",
+      "default": false
+    }
+  },
+  "resources": {
+    "sprites": [
+      "resources/*.png",
+      "logo.png"
+    ],
+    "files": [
+      "resources/blitzkrieg-LICENSE.txt"
+    ]
+  },
+  "dependencies": {
+    "geode.node-ids": ">=v1.23.3"
+  }
+}
