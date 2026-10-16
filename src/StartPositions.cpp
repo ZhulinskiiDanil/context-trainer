@@ -10,7 +10,8 @@ namespace {
 void selectStart(PlayLayer* play, StartPosObject* object) {
     play->removeAllCheckpoints();
     // Native reset otherwise reloads the cached snapshot of the previous StartPos.
-    CC_SAFE_RELEASE_NULL(play->m_currentCheckpoint);
+    // 2.209 caches checkpoints per start pos in a dictionary at the old m_currentCheckpoint slot
+    if (play->m_startPosCheckpoints) play->m_startPosCheckpoints->removeAllObjects();
     play->setStartPosObject(object);
 }
 }
